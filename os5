@@ -1,0 +1,49 @@
+#include <stdio.h>
+#define MAX_PROCESSES 10
+struct process {
+    int pid;            
+    int priority;       
+    int burst_time;    
+};
+int select_process(struct process processes[], int n) {
+    int highest_priority = -1;
+    int selected_process = -1,i;
+    for (i = 0; i < n; i++) {
+        if (processes[i].priority > highest_priority && processes[i].burst_time > 0) {
+            highest_priority = processes[i].priority;     
+            selected_process = i;                         
+        }
+    }    
+    return selected_process;
+}
+void execute_process(struct process *p) {
+    printf("Executing process with ID %d\n", p->pid);
+    p->burst_time--;    
+}
+int main() {
+    struct process processes[MAX_PROCESSES];    
+    int n,i;                                      
+    int current_time = 0;                       
+    int completed_processes = 0;                
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+    for (i = 0; i < n; i++) {
+        printf("Enter the priority and burst time for process %d: ", i+1);
+        scanf("%d %d", &processes[i].priority, &processes[i].burst_time);
+        processes[i].pid = i+1;
+    }
+    while (completed_processes < n) {
+        int selected_process = select_process(processes, n);
+        if (selected_process == -1) {
+            current_time++;
+            continue;
+        }
+        execute_process(&processes[selected_process]);
+        if (processes[selected_process].burst_time == 0) {
+            printf("Process with ID %d completed at time %d\n", processes[selected_process].pid, current_time+1);
+            completed_processes++;
+        }
+        current_time++;
+    }
+    return 0;
+}
