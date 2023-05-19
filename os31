@@ -1,0 +1,81 @@
+#include <stdio.h>
+
+#define FRAME_SIZE 3
+#define PAGE_SIZE 5
+
+void printFrames(int frames[], int frameCount) {
+	int i;
+    for ( i = 0; i < frameCount; i++) {
+        if (frames[i] == -1) {
+            printf(" -");
+        } else {
+            printf(" %d", frames[i]);
+        }
+    }
+    printf("\n");
+}
+
+int isInFrames(int frames[], int frameCount, int pageNumber) {
+	int i;
+    for ( i = 0; i < frameCount; i++) {
+        if (frames[i] == pageNumber) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int getReplacementIndex(int frames[], int frameCount, int pageSequence[], int pageSequenceLength, int currentIndex) {
+	int i,j;
+    for ( i = 0; i < frameCount; i++) {
+        int foundLater = 0;
+        for (j = currentIndex + 1; j < pageSequenceLength; j++) {
+            if (frames[i] == pageSequence[j]) {
+                foundLater = 1;
+                break;
+            }
+        }
+        if (!foundLater) {
+            return i;
+        }
+    }
+    return 0;
+}
+
+void simulateFIFO(int pageSequence[], int pageSequenceLength) {
+    int frames[FRAME_SIZE] = {-1, -1, -1};
+    int faultCount = 0;
+    int currentIndex = 0;
+    int i;
+
+    printf("Page sequence: ");
+    for (i = 0; i < pageSequenceLength; i++) {
+        printf("%d ", pageSequence[i]);
+    }
+    printf("\n\n");
+
+    printf("Page replacement process:\n");
+    for (i = 0; i < pageSequenceLength; i++) {
+        printf("Page %d: ", pageSequence[i]);
+        if (isInFrames(frames, FRAME_SIZE, pageSequence[i])) {
+            printf("No page fault\n");
+        } else {
+            int replacementIndex = getReplacementIndex(frames, FRAME_SIZE, pageSequence, pageSequenceLength, currentIndex);
+            frames[replacementIndex] = pageSequence[i];
+            currentIndex = (currentIndex + 1) % pageSequenceLength;
+            faultCount++;
+            printf("Page fault - Replaced page %d\n", frames[replacementIndex]);
+        }
+        printf("Frames: ");
+        printFrames(frames, FRAME_SIZE);
+    }
+    printf("\nTotal page faults: %d\n", faultCount);
+}
+
+int main() {
+    int pageSequence[PAGE_SIZE] = {1, 2, 3, 4, 5};
+
+    simulateFIFO(pageSequence, PAGE_SIZE);
+
+    return 0;
+}
