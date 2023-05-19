@@ -1,0 +1,89 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define FRAME_SIZE 3
+#define PAGE_SIZE 10
+
+void printFrames(int frames[], int frameCount) {
+	int i;
+    for ( i = 0; i < frameCount; i++) {
+        if (frames[i] == -1) {
+            printf(" -");
+        } else {
+            printf(" %d", frames[i]);
+        }
+    }
+    printf("\n");
+}
+
+bool isInFrames(int frames[], int frameCount, int pageNumber) {
+	int i;
+    for ( i = 0; i < frameCount; i++) {
+        if (frames[i] == pageNumber) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int getReplacementIndex(int frames[], int frameCount, int pageSequence[], int pageSequenceLength, int currentIndex) {
+    int furthestIndex = -1;
+    int replacementIndex = -1;
+    int i;
+
+    for (i = 0; i < frameCount; i++) {
+        int j;
+        for (j = currentIndex + 1; j < pageSequenceLength; j++) {
+            if (frames[i] == pageSequence[j]) {
+                if (j > furthestIndex) {
+                    furthestIndex = j;
+                    replacementIndex = i;
+                }
+                break;
+            }
+        }
+
+        if (j == pageSequenceLength) {
+            return i;
+        }
+    }
+
+    return replacementIndex;
+}
+
+void simulateOptimal(int pageSequence[], int pageSequenceLength) {
+    int frames[FRAME_SIZE] = {-1, -1, -1};
+    int faultCount = 0;
+    int i;
+
+    printf("Page sequence: ");
+    for (i = 0; i < pageSequenceLength; i++) {
+        printf("%d ", pageSequence[i]);
+    }
+    printf("\n\n");
+
+    printf("Page replacement process:\n");
+    for (i = 0; i < pageSequenceLength; i++) {
+        printf("Page %d: ", pageSequence[i]);
+        if (isInFrames(frames, FRAME_SIZE, pageSequence[i])) {
+            printf("No page fault\n");
+        } else {
+            int replacementIndex = getReplacementIndex(frames, FRAME_SIZE, pageSequence, pageSequenceLength, i);
+            frames[replacementIndex] = pageSequence[i];
+            faultCount++;
+            printf("Page fault - Replaced page %d\n", frames[replacementIndex]);
+        }
+        printf("Frames: ");
+        printFrames(frames, FRAME_SIZE);
+    }
+    printf("\nTotal page faults: %d\n", faultCount);
+}
+
+int main() {
+    int pageSequence[PAGE_SIZE] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 1};
+
+    simulateOptimal(pageSequence, PAGE_SIZE);
+
+    return 0;
+}
