@@ -1,0 +1,46 @@
+#include <stdio.h>
+#define MAX_PROCESSES 10
+#define TIME_QUANTUM 2
+struct process {
+    int pid;            
+    int burst_time;    
+    int remaining_time; 
+    int waiting_time;   
+};
+int main() {
+    struct process processes[MAX_PROCESSES];   
+    int n;                                      
+    int current_time = 0;                       
+    int completed_processes = 0,i;                
+    float average_waiting_time = 0;             
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+    for (i = 0; i < n; i++) {
+        printf("Enter the burst time for process %d: ", i+1);
+        scanf("%d", &processes[i].burst_time);
+        processes[i].remaining_time = processes[i].burst_time;
+        processes[i].pid = i+1;
+    }
+    while (completed_processes < n) {
+        for ( i = 0; i < n; i++) {
+            if (processes[i].remaining_time > 0) {
+                if (processes[i].remaining_time <= TIME_QUANTUM) {
+                    current_time += processes[i].remaining_time;    
+                    processes[i].waiting_time = current_time - processes[i].burst_time;  
+                    processes[i].remaining_time = 0;    
+                    completed_processes++;              
+                }
+                else {
+                    current_time += TIME_QUANTUM;       
+                    processes[i].remaining_time -= TIME_QUANTUM;  
+                }
+            }
+        }
+    }
+    for (i = 0; i < n; i++) {
+        average_waiting_time += processes[i].waiting_time;
+    }
+    average_waiting_time /= n;
+    printf("Average waiting time: %.2f\n", average_waiting_time);
+    return 0;
+}
