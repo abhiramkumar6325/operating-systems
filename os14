@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <stdlib.h>
+int main() {
+    int n, i;
+    char filename[20];
+    printf("Enter the number of files: ");
+    scanf("%d", &n);
+    system("mkdir files");
+    for (i = 1; i <= n; i++) {
+        sprintf(filename, "files/file%d.txt", i); 
+        FILE *fp = fopen(filename, "w"); 
+        if (fp == NULL) {
+            printf("Failed to create file %s\n", filename);
+            exit(1);
+        }
+        fprintf(fp, "This is file %d\n", i); 
+        fclose(fp); // Close file
+    }
+    printf("Contents of the files:\n");
+    for (i = 1; i <= n; i++) {
+        sprintf(filename, "files/file%d.txt", i); 
+        FILE *fp = fopen(filename, "r"); 
+        if (fp == NULL) {
+            printf("Failed to read file %s\n", filename);
+            exit(1);
+        }
+        char ch;
+        while ((ch = fgetc(fp)) != EOF) { 
+            printf("%c", ch);
+        }
+        printf("\n");
+        fclose(fp); 
+    }
+    for (i = 1; i <= n; i++) {
+        sprintf(filename, "files/file%d.txt", i); 
+        remove(filename); 
+    }
+    system("rmdir files"); 
+    return 0;
+}
