@@ -1,0 +1,57 @@
+#include <stdio.h>
+#define MAX_PROCESSES 10
+struct process {
+    int pid;           
+    int burst_time;     
+    int waiting_time;  
+};
+int select_process(struct process processes[], int n) {
+    int shortest_burst_time = 99999;
+    int selected_process = -1,i;
+    for (i = 0; i < n; i++) {
+        if (processes[i].burst_time < shortest_burst_time && processes[i].burst_time > 0) {
+            shortest_burst_time = processes[i].burst_time;  
+            selected_process = i;                           
+        }
+    }  
+    return selected_process;
+}
+int main() {
+    struct process processes[MAX_PROCESSES];    
+    int n;                                      
+    int current_time = 0;                       
+    int completed_processes = 0,i;                
+    float average_waiting_time = 0;            
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+    for (i = 0; i < n; i++) {
+        printf("Enter the burst time for process %d: ", i+1);
+        scanf("%d", &processes[i].burst_time);
+        processes[i].pid = i+1;
+    }
+    while (completed_processes < n) {
+        int selected_process = select_process(processes, n);
+        if (selected_process == -1) {
+            current_time++;
+            continue;
+        }
+        for (i = 0; i < n; i++) {
+            if (i != selected_process && processes[i].burst_time > 0) {
+                processes[i].waiting_time++;
+            }
+        }
+        processes[selected_process].burst_time--;
+        if (processes[selected_process].burst_time == 0) {
+            printf("Process with ID %d completed at time %d\n", processes[selected_process].pid, current_time+1);
+            processes[selected_process].waiting_time++;   
+            completed_processes++;
+        }
+        current_time++;
+    }
+    for (i = 0; i < n; i++) {
+        average_waiting_time += processes[i].waiting_time;
+    }
+    average_waiting_time /= n;
+    printf("Average waiting time: %.2f\n", average_waiting_time);
+    return 0;
+}
