@@ -1,0 +1,54 @@
+#include <stdio.h>
+
+#define MAX_BLOCKS 100
+#define MAX_PROCESS 100
+
+void firstFit(int blocks[], int m, int process[], int n) {
+    int allocation[MAX_PROCESS] = {0},i,j;
+  
+    for ( i = 0; i < n; i++) {
+        for ( j = 0; j < m; j++) {
+            if (blocks[j] >= process[i]) {
+                allocation[i] = j + 1;
+                blocks[j] -= process[i];
+                break;
+            }
+        }
+    }
+  
+    printf("\nProcess No.\tProcess Size\tBlock No.\n");
+    for (i = 0; i < n; i++) {
+        printf("%d\t\t%d\t\t", i + 1, process[i]);
+        if (allocation[i] != 0) {
+            printf("%d\n", allocation[i]);
+        } else {
+            printf("Not Allocated\n");
+        }
+    }
+}
+
+int main() {
+    int blocks[MAX_BLOCKS];
+    int process[MAX_PROCESS];
+    int m, n,i;
+  
+    printf("Enter the number of memory blocks: ");
+    scanf("%d", &m);
+  
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+  
+    printf("Enter the size of memory blocks: ");
+    for (i = 0; i < m; i++) {
+        scanf("%d", &blocks[i]);
+    }
+  
+    printf("Enter the size of processes: ");
+    for (i = 0; i < n; i++) {
+        scanf("%d", &process[i]);
+    }
+  
+    firstFit(blocks, m, process, n);
+  
+    return 0;
+}
