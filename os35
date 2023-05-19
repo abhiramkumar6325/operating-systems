@@ -1,0 +1,57 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_BLOCKS 100
+#define MAX_RECORDS_PER_BLOCK 10
+
+typedef struct {
+    int recordNumber;
+    char data[50];
+} Record;
+
+typedef struct {
+    int blockPointers[MAX_BLOCKS];
+} IndexBlock;
+
+void readRecords(Record** file, int numBlocks) {
+	int i,j;
+    for (i = 0; i < numBlocks; i++) {
+        for ( j = 0; j < MAX_RECORDS_PER_BLOCK; j++) {
+            printf("Block %d, Record %d: %s\n", i, (*file)[i * MAX_RECORDS_PER_BLOCK + j].recordNumber, (*file)[i * MAX_RECORDS_PER_BLOCK + j].data);
+        }
+    }
+}
+
+int main() {
+    int numBlocks;
+    int i,j;
+    IndexBlock indexBlock;
+    Record* file;
+
+    printf("Enter the number of blocks: ");
+    scanf("%d", &numBlocks);
+
+    printf("Enter the block pointers (0-based indexing):\n");
+    for ( i = 0; i < numBlocks; i++) {
+        printf("Block %d: ", i);
+        scanf("%d", &indexBlock.blockPointers[i]);
+    }
+
+    file = (Record*)malloc(numBlocks * MAX_RECORDS_PER_BLOCK * sizeof(Record));
+
+    for (i = 0; i < numBlocks; i++) {
+        for (j = 0; j < MAX_RECORDS_PER_BLOCK; j++) {
+            int recordIndex = i * MAX_RECORDS_PER_BLOCK + j;
+            file[recordIndex].recordNumber = recordIndex + 1;
+            printf("Enter data for Block %d, Record %d: ", i, file[recordIndex].recordNumber);
+            scanf("%s", file[recordIndex].data);
+        }
+    }
+
+    printf("\nFile Contents:\n");
+    readRecords(&file, numBlocks);
+
+    free(file);
+
+    return 0;
+}
