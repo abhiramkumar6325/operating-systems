@@ -1,0 +1,92 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define FRAME_SIZE 3
+#define PAGE_SIZE 10
+
+void printFrames(int frames[], int frameCount) {
+	int i;
+    for (i = 0; i < frameCount; i++) {
+        if (frames[i] == -1) {
+            printf(" -");
+        } else {
+            printf(" %d", frames[i]);
+        }
+    }
+    printf("\n");
+}
+
+int isInFrames(int frames[], int frameCount, int pageNumber) {
+	int i;
+    for ( i = 0; i < frameCount; i++) {
+        if (frames[i] == pageNumber) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int getReplacementIndex(int referenceBits[], int frameCount) {
+    int minBit = referenceBits[0];
+    int minIndex = 0;
+    int i;
+
+    for (i = 1; i < frameCount; i++) {
+        if (referenceBits[i] < minBit) {
+            minBit = referenceBits[i];
+            minIndex = i;
+        }
+    }
+
+    return minIndex;
+}
+
+void updateReferenceBits(int referenceBits[], int frameCount, int accessedPage) {
+	int i;
+    for (i = 0; i < frameCount; i++) {
+        if (referenceBits[i] != -1 && referenceBits[i] != accessedPage) {
+            referenceBits[i]++;
+        }
+    }
+}
+
+void simulateLRU(int pageSequence[], int pageSequenceLength) {
+    int frames[FRAME_SIZE] = {-1, -1, -1};
+    int referenceBits[FRAME_SIZE] = {-1, -1, -1};
+    int faultCount = 0;
+
+    printf("Page sequence: ");
+    int i;
+    for (i = 0; i < pageSequenceLength; i++) {
+        printf("%d ", pageSequence[i]);
+    }
+    printf("\n\n");
+
+    printf("Page replacement process:\n");
+    
+    for (i = 0; i < pageSequenceLength; i++) {
+        printf("Page %d: ", pageSequence[i]);
+        if (isInFrames(frames, FRAME_SIZE, pageSequence[i])) {
+            printf("No page fault\n");
+            updateReferenceBits(referenceBits, FRAME_SIZE, pageSequence[i]);
+        } else {
+            int replacementIndex = getReplacementIndex(referenceBits, FRAME_SIZE);
+            frames[replacementIndex] = pageSequence[i];
+            referenceBits[replacementIndex] = 0;
+            faultCount++;
+            printf("Page fault - Replaced page %d\n", frames[replacementIndex]);
+            updateReferenceBits(referenceBits, FRAME_SIZE, pageSequence[i]);
+        }
+        printf("Frames: ");
+        printFrames(frames, FRAME_SIZE);
+    }
+    printf("\nTotal page faults: %d\n", faultCount);
+}
+
+int main() {
+    int pageSequence[PAGE_SIZE] = {1, 2, 3, 4, 1, 2, 5, 1, 2, 3};
+
+    simulateLRU(pageSequence, PAGE_SIZE);
+
+    return 0;
+}
