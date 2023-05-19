@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_RECORDS 100
+
+typedef struct {
+    int recordNumber;
+    char data[50];
+} Record;
+
+void readRecords(Record* file, int numRecords) {
+	int i;
+    for ( i = 0; i < numRecords; i++) {
+        printf("Record %d: %s\n", file[i].recordNumber, file[i].data);
+    }
+}
+
+int main() {
+    int numRecords;
+    int i;
+    Record* file;
+
+    printf("Enter the number of records: ");
+    scanf("%d", &numRecords);
+
+    file = (Record*)malloc(numRecords * sizeof(Record));
+
+    for (i = 0; i < numRecords; i++) {
+        file[i].recordNumber = i + 1;
+        printf("Enter data for Record %d: ", file[i].recordNumber);
+        scanf("%s", file[i].data);
+    }
+
+    printf("\nFile Contents:\n");
+    readRecords(file, numRecords);
+
+    free(file);
+
+    return 0;
+}
