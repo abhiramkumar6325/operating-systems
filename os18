@@ -1,0 +1,55 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <semaphore.h>
+#define BUFFER_SIZE 10
+int buffer[BUFFER_SIZE];
+int in = 0;
+int out = 0;
+sem_t emptySlots;   
+sem_t fullSlots;   
+sem_t bufferMutex; 
+void *producer(void *arg)
+{
+    int item;
+    while (1) {
+        item = rand() % 100;  
+        sem_wait(&emptySlots); 
+        sem_wait(&bufferMutex); 
+        buffer[in] = item;  
+        in = (in + 1) % BUFFER_SIZE;
+        printf("Producer produced item: %d\n", item);
+        sem_post(&bufferMutex); 
+        sem_post(&fullSlots);   
+    }
+}
+void *consumer(void *arg)
+{
+    int item;
+    while (1) {
+        sem_wait(&fullSlots);  
+        sem_wait(&bufferMutex);
+
+        item = buffer[out];  
+        out = (out + 1) % BUFFER_SIZE;
+        printf("Consumer consumed item: %d\n", item);
+        sem_post(&bufferMutex);  
+        sem_post(&emptySlots);   
+    }
+}
+int main()
+{
+    srand(time(NULL));
+    sem_init(&emptySlots, 0, BUFFER_SIZE);  
+    sem_init(&fullSlots, 0, 0);             
+    sem_init(&bufferMutex, 0, 1);           
+    pthread_t producerThread, consumerThread;
+    pthread_create(&producerThread, NULL, producer, NULL);
+    pthread_create(&consumerThread, NULL, consumer, NULL);
+    pthread_join(producerThread, NULL);
+    pthread_join(consumerThread, NULL);
+    sem_destroy(&emptySlots);
+    sem_destroy(&fullSlots);
+    sem_destroy(&bufferMutex);
+    return 0;
+}
