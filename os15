@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <stdlib.h>
+int main() {
+    int n, i, j;
+    char dirname[20], filename[20];
+    printf("Enter the name of the root directory: ");
+    scanf("%s", dirname);
+    if (mkdir(dirname) == -1) {
+        printf("Failed to create directory %s\n", dirname);
+        exit(1);
+    }
+    printf("Enter the number of subdirectories: ");
+    scanf("%d", &n);
+    for (i = 1; i <= n; i++) {
+        sprintf(dirname, "%s/subdir%d", dirname, i); 
+        if (mkdir(dirname) == -1) {
+            printf("Failed to create directory %s\n", dirname);
+            exit(1);
+        }
+        for (j = 1; j <= i; j++) {
+            sprintf(filename, "%s/file%d.txt", dirname, j); 
+            FILE *fp = fopen(filename, "w"); 
+            if (fp == NULL) {
+                printf("Failed to create file %s\n", filename);
+                exit(1);
+            }
+            fprintf(fp, "This is file %d in subdirectory %d\n", j, i); 
+            fclose(fp); 
+        }
+    }
+    printf("Contents of the files:\n");
+    for (i = 1; i <= n; i++) {
+        sprintf(dirname, "%s/subdir%d", dirname, i); // Set dirname
+        for (j = 1; j <= i; j++) {
+            sprintf(filename, "%s/file%d.txt", dirname, j); // Set filename
+            FILE *fp = fopen(filename, "r"); // Open file
+            if (fp == NULL) {
+                printf("Failed to read file %s\n", filename);
+                exit(1);
+            }
+            char ch;
+            while ((ch = fgetc(fp)) != EOF) { // Read character by character
+                printf("%c", ch);
+            }
+            printf("\n");
+            fclose(fp); 
+        }
+    }
+    for (i = 1; i <= n; i++) {
+        sprintf(dirname, "%s/subdir%d", dirname, i); 
+        for (j = 1; j <= i; j++) {
+            sprintf(filename, "%s/file%d.txt", dirname, j); 
+            remove(filename); 
+        }
+        rmdir(dirname); 
+    }
+    rmdir(dirname); 
+    return 0;
+}
