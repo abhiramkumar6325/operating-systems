@@ -1,0 +1,48 @@
+#include <stdio.h>
+#define MAX_PROCESSES 100
+struct process {
+    int pid;
+    int arrival_time;
+    int execution_time;
+};
+int main() {
+    struct process processes[MAX_PROCESSES];
+    int num_processes, current_time, i, j, min_exec_time, min_index;
+    printf("Enter the number of processes: ");
+    scanf("%d", &num_processes);
+    for (i = 0; i < num_processes; i++) {
+        printf("Enter details for process %d:\n", i + 1);
+        printf("PID: ");
+        scanf("%d", &processes[i].pid);
+        printf("Arrival time: ");
+        scanf("%d", &processes[i].arrival_time);
+        printf("Execution time: ");
+        scanf("%d", &processes[i].execution_time);
+    }
+    for (i = 0; i < num_processes; i++) {
+        for (j = i + 1; j < num_processes; j++) {
+            if (processes[i].arrival_time > processes[j].arrival_time) {
+                struct process temp = processes[i];
+                processes[i] = processes[j];
+                processes[j] = temp;
+            }
+        }
+    }
+    current_time = 0;
+    for (i = 0; i < num_processes; i++) {
+        min_exec_time = processes[i].execution_time;
+        min_index = i;
+        for (j = i + 1; j < num_processes && processes[j].arrival_time <= current_time; j++) {
+            if (processes[j].execution_time < min_exec_time) {
+                min_exec_time = processes[j].execution_time;
+                min_index = j;
+            }
+        }
+        printf("Executing process %d from time %d to time %d\n", processes[min_index].pid, current_time, current_time + min_exec_time);
+        current_time += min_exec_time;
+        struct process temp = processes[i];
+        processes[i] = processes[min_index];
+        processes[min_index] = temp;
+    }
+    return 0;
+}
