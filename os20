@@ -1,0 +1,72 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <semaphore.h>
+#define NUM_READERS 3
+#define NUM_WRITERS 2
+int shared_data = 0;
+int readers_count = 0;
+sem_t mutex, wrt;
+void* readerFunction(void* arg) {
+    int thread_id = *((int*)arg);
+    sem_wait(&mutex);
+    readers_count++;
+    if (readers_count == 1) {
+        sem_wait(&wrt);
+    }
+    sem_post(&mutex);
+    printf("Reader %d reads shared data: %d\n", thread_id, shared_data);
+    sem_wait(&mutex);
+    readers_count--;
+    if (readers_count == 0) {
+        sem_post(&wrt);
+    }
+    sem_post(&mutex);
+    pthread_exit(NULL);
+}
+void* writerFunction(void* arg) {
+    int thread_id = *((int*)arg);
+    sem_wait(&wrt);
+    shared_data++;
+    printf("Writer %d writes shared data: %d\n", thread_id, shared_data);
+    sem_post(&wrt);
+    pthread_exit(NULL);
+}
+int main() {
+    pthread_t readerThreads[NUM_READERS];
+    pthread_t writerThreads[NUM_WRITERS];
+    int reader_ids[NUM_READERS];
+    int writer_ids[NUM_WRITERS];
+    int i;
+    sem_init(&mutex, 0, 1);
+    sem_init(&wrt, 0, 1);
+    for (i = 0; i < NUM_READERS; i++) {
+        reader_ids[i] = i;
+        if (pthread_create(&readerThreads[i], NULL, readerFunction, &reader_ids[i]) != 0) {
+            fprintf(stderr, "Error creating reader thread\n");
+            return 1;
+        }
+    }
+    for (i = 0; i < NUM_WRITERS; i++) {
+        writer_ids[i] = i;
+        if (pthread_create(&writerThreads[i], NULL, writerFunction, &writer_ids[i]) != 0) {
+            fprintf(stderr, "Error creating writer thread\n");
+            return 1;
+        }
+    }
+    for (i = 0; i < NUM_READERS; i++) {
+        if (pthread_join(readerThreads[i], NULL) != 0) {
+            fprintf(stderr, "Error joining reader thread\n");
+            return 1;
+        }
+    }
+    for (i = 0; i < NUM_WRITERS; i++) {
+        if (pthread_join(writerThreads[i], NULL) != 0) {
+            fprintf(stderr, "Error joining writer thread\n");
+            return 1;
+        }
+    }
+    sem_destroy(&mutex);
+    sem_destroy(&wrt);
+    return 0;
+}
